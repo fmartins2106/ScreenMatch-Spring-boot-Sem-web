@@ -13,7 +13,7 @@ public class Episodios {
     public Episodios(Integer numeroTemporada, DadosEpisodeos dadosEpisodeos) {
         this.temporada = numeroTemporada;
         this.titulo = dadosEpisodeos.Titulo();
-        this.numeroEpisodio = dadosEpisodeos.numero();
+//        this.numeroEpisodio = dadosEpisodeos.numero();
         try {
             this.avaliacao = Double.valueOf(dadosEpisodeos.avaliacao());
         }catch (NumberFormatException e){

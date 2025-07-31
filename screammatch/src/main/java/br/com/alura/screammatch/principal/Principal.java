@@ -6,10 +6,7 @@ import br.com.alura.screammatch.service.ConverteDados;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -18,35 +15,48 @@ public class Principal {
     private ConverteDados converteDados = new ConverteDados();
     private final String ENDERECO = "http://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=257b8762";
+    List<DadosSerie> dadosSeries = new ArrayList<>();
+    List<Serie> seriesPesquisadas = new ArrayList<>();
 
 
     public void exibeMenu() {
-        var menu = """
+        int opcao = -1;
+        while (opcao !=0){
+            var menu = """
                 1 - Buscar séries
                 2 - Buscar episódios
+                3 - Listar séries pesquisadas
                 0 - Sair """;
 
-        System.out.println(menu);
-        var opcao = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (opcao) {
-            case 1:
-                buscarSerieWeb();
-                break;
-            case 2:
-                buscarEpisodioPorSerie();
-                break;
-            case 0:
-                System.out.println("Saindo...");
-                break;
-            default:
-                System.out.println("Opção inválida");
+            System.out.println(menu);
+            try {
+                opcao = Integer.parseInt(scanner.nextLine().trim());
+            }catch (NumberFormatException e){
+                System.out.println("Erro. Digite uma opção válida.");
+            }
+            switch (opcao) {
+                case 1:
+                    buscarSerieWeb();
+                    break;
+                case 2:
+                    buscarEpisodioPorSerie();
+                    break;
+                case 3:
+                    buscarSeriesListadas();
+                    break;
+                case 0:
+                    System.out.println("Saindo...");
+                    break;
+                default:
+                    System.out.println("Opção inválida");
+            }
         }
     }
     
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
+        dadosSeries.add(dados);
+        seriesPesquisadas.add(new Serie(dados));
         System.out.println(dados);
     }
 
@@ -57,7 +67,6 @@ public class Principal {
         DadosSerie dados = converteDados.obterDados(json, DadosSerie.class);
         return dados;
     }
-
 
     private void buscarEpisodioPorSerie() {
         DadosSerie dadosSerie = getDadosSerie();
@@ -70,6 +79,17 @@ public class Principal {
         }
         temporadas.forEach(System.out::println);
     }
+
+    public void buscarSeriesListadas(){
+        seriesPesquisadas.stream()
+                .sorted(Comparator.comparing(Serie::getGenero))
+                        .forEach(System.out::println);
+    }
+
+
+
+
+
 
 
 //    public void getDadosSerie(){
