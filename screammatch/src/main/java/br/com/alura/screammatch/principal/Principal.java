@@ -1,8 +1,10 @@
 package br.com.alura.screammatch.principal;
 
 import br.com.alura.screammatch.Model.*;
+import br.com.alura.screammatch.repository.SerieRepository;
 import br.com.alura.screammatch.service.ConsumoAPI;
 import br.com.alura.screammatch.service.ConverteDados;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +20,11 @@ public class Principal {
     List<DadosSerie> dadosSeries = new ArrayList<>();
     List<Serie> seriesPesquisadas = new ArrayList<>();
 
+    private SerieRepository repository;
+
+    public Principal(SerieRepository repository) {
+        this.repository = repository;
+    }
 
     public void exibeMenu() {
         int opcao = -1;
@@ -55,7 +62,9 @@ public class Principal {
     
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
-        dadosSeries.add(dados);
+        Serie serie = new Serie(dados);
+//        dadosSeries.add(dados);
+        repository.save(serie);
         seriesPesquisadas.add(new Serie(dados));
         System.out.println(dados);
     }
