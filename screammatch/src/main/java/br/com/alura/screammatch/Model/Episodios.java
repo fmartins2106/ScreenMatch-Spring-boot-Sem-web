@@ -1,14 +1,24 @@
 package br.com.alura.screammatch.Model;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.ManyToAny;
+
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "episodios")
 public class Episodios {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Integer temporada;
     private String titulo;
     private Integer numeroEpisodio;
     private Double avaliacao;
     private LocalDate dataLancamento;
+    @ManyToOne
+    private Serie serie;
 
     public Episodios(Integer numeroTemporada, DadosEpisodeos dadosEpisodeos) {
         this.temporada = numeroTemporada;
@@ -25,6 +35,8 @@ public class Episodios {
             this.dataLancamento = null;
         }
     }
+
+
 
 
     public Integer getTemporada() {

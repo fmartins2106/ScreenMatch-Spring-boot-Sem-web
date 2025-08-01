@@ -63,9 +63,7 @@ public class Principal {
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
         Serie serie = new Serie(dados);
-//        dadosSeries.add(dados);
         repository.save(serie);
-        seriesPesquisadas.add(new Serie(dados));
         System.out.println(dados);
     }
 
@@ -90,7 +88,8 @@ public class Principal {
     }
 
     public void buscarSeriesListadas(){
-        seriesPesquisadas.stream()
+        List<Serie> series = repository.findAll();
+        series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
                         .forEach(System.out::println);
     }
