@@ -15,14 +15,15 @@ public class Serie {
     private Long id;
     @Column(unique = true)
     private String titulo;
-    private String totalTemporadas;
+    private Integer totalTemporadas;
     private Double avaliacao;
     @Enumerated(EnumType.STRING)
     private Categoria genero;
     private String atores;
     private String poster;
     private String sinopse;
-    @OneToMany(mappedBy = "serie")
+
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Episodios> episodios = new ArrayList<>();
 
     public Serie() {
@@ -30,7 +31,7 @@ public class Serie {
 
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
-        this.totalTemporadas = dadosSerie.totalTemporadas();
+        this.totalTemporadas = Integer.valueOf(dadosSerie.totalTemporadas());
         String avaliacaoStr = dadosSerie.avaliacao();
         this.avaliacao = Optional.ofNullable(avaliacaoStr)
                 .filter(s -> !s.isBlank())
@@ -56,11 +57,11 @@ public class Serie {
         this.titulo = titulo;
     }
 
-    public String getTotalTemporadas() {
+    public Integer getTotalTemporadas() {
         return totalTemporadas;
     }
 
-    public void setTotalTemporadas(String totalTemporadas) {
+    public void setTotalTemporadas(Integer totalTemporadas) {
         this.totalTemporadas = totalTemporadas;
     }
 
@@ -117,6 +118,9 @@ public class Serie {
     }
 
     public void setEpisodios(List<Episodios> episodios) {
+        if (episodios != null){
+            episodios.forEach(e-> e.setSerie(this));
+        }
         this.episodios = episodios;
     }
 

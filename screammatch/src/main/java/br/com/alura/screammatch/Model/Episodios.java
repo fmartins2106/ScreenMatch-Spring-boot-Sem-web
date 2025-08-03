@@ -20,10 +20,13 @@ public class Episodios {
     @ManyToOne
     private Serie serie;
 
+    public Episodios() {
+    }
+
     public Episodios(Integer numeroTemporada, DadosEpisodeos dadosEpisodeos) {
         this.temporada = numeroTemporada;
         this.titulo = dadosEpisodeos.Titulo();
-//        this.numeroEpisodio = dadosEpisodeos.numero();
+        this.numeroEpisodio = dadosEpisodeos.numero();
         try {
             this.avaliacao = Double.valueOf(dadosEpisodeos.avaliacao());
         }catch (NumberFormatException e){
@@ -36,8 +39,21 @@ public class Episodios {
         }
     }
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
+    public Serie getSerie() {
+        return serie;
+    }
+
+    public void setSerie(Serie serie) {
+        this.serie = serie;
+    }
 
     public Integer getTemporada() {
         return temporada;
