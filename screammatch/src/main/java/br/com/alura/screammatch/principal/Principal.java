@@ -4,7 +4,9 @@ import br.com.alura.screammatch.Model.*;
 import br.com.alura.screammatch.repository.SerieRepository;
 import br.com.alura.screammatch.service.ConsumoAPI;
 import br.com.alura.screammatch.service.ConverteDados;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +25,8 @@ public class Principal {
     private SerieRepository repository;
     private List<Serie> series = new ArrayList<>();
 
+    private Optional<Serie> serieBusca;
+
 
     public Principal(SerieRepository repository) {
         this.repository = repository;
@@ -39,6 +43,10 @@ public class Principal {
                 5 - Buscar séries por ator.
                 6 - Top 5 séries mais bem avaliadas.
                 7 - Buscar séries por categoria.
+                8 - Pesquisa por temporadas e avaliação.
+                9 - Pesquisa por nome do eposodio.
+                10- Top 5 episodios.
+                11- Busca episodios a partir de uma data.
                 0 - Sair """;
 
             System.out.println(menu);
@@ -68,6 +76,18 @@ public class Principal {
                     break;
                 case 7:
                     buscarSeriesPorCategoria();
+                    break;
+                case 8:
+                    filtrarSeriesTemporadas();
+                    break;
+                case 9:
+                    pesquisaNomeEpisodio();
+                    break;
+                case 10:
+                    topEpisodiosPorSerie();
+                    break;
+                case 11:
+                    buscarEpisodioPorData();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -129,9 +149,9 @@ public class Principal {
     public void buscarSerieTitulo(){
         System.out.println("Ecolha uma série pelo titulo:");
         String nomeSerie = scanner.nextLine().trim();
-        Optional<Serie> serieBuscada = repository.findByTituloContainingIgnoreCase(nomeSerie);
-        if (serieBuscada.isPresent()){
-            System.out.println("Dados série:"+serieBuscada.get());
+        serieBusca = repository.findByTituloContainingIgnoreCase(nomeSerie);
+        if (serieBusca.isPresent()){
+            System.out.println("Dados série:"+serieBusca.get());
             return;
         }
         System.out.println("Série não encontrada.");
@@ -170,6 +190,74 @@ public class Principal {
         } else {
             System.out.println("Séries da categoria: " + genero);
             seriesPorCategoria.forEach(System.out::println);
+        }
+    }
+
+    private void filtrarSeriesTemporadas(){
+        try {
+            System.out.println("Filtrar séries até quantas temparadas?:");
+            int serieTemp = Integer.parseInt(scanner.nextLine().trim());
+            if (serieTemp < 0 || serieTemp > 100){
+                System.out.println("Digite um número válido.");
+                return;
+            }
+            System.out.println("Com avaliação a partir de quanto ?:");
+            double avaliacao = Double.parseDouble(scanner.nextLine().trim());
+            if (avaliacao < 0 || avaliacao > 10){
+                System.out.println("Erro, digite um valor válido para avaliação.");
+                return;
+            }
+            List<Serie> seriesEncontradas = repository.seriesPorTemporadaEAvaliacao(serieTemp,avaliacao);
+            System.out.println("Séries encontradas:");
+            seriesEncontradas.forEach(s -> System.out.println("Nome:"+s.getTitulo()+" |Temporadas:"+s.getTotalTemporadas()+" |Avaliação:"+s.getAvaliacao()));
+        }catch (NumberFormatException e){
+            System.out.println("Erro, digite um número válido.");
+        }
+    }
+
+    public void pesquisaNomeEpisodio(){
+        System.out.println("Qual o nome do episódio para buscar: ?");
+        String trechoEpisodio = scanner.nextLine().trim();
+        List<Episodios> episodioEncontrado = repository.episodioPorTrecho(trechoEpisodio);
+        episodioEncontrado.forEach(e -> System.out.printf("Série: %s |Temporada: %s |Episodio %s - %s\n",
+                e.getSerie().getTitulo(),e.getTemporada(),e.getNumeroEpisodio(),e.getTitulo()));
+    }
+
+//    public void topEpisodiosPorSerie(){
+//        buscarSerieTitulo();
+//        if (serieBusca.isPresent()){
+//            Serie serie = serieBusca.get();
+//            List<Episodios> topEpisodios = repository.topEpisodiosPorSerie(serie, PageRequest.of(0,5));
+//            topEpisodios.forEach(e -> System.out.printf("Série: %s |Temporada: %s |Episodio %s - %s |Avaliação:%.2f\n",
+//                    e.getSerie().getTitulo(),e.getTemporada(),e.getNumeroEpisodio(),e.getTitulo(),e.getAvaliacao()));
+//        }
+//    }
+
+    public void topEpisodiosPorSerie() {
+        buscarSerieTitulo();
+        if (serieBusca.isPresent()) {
+            Serie serie = serieBusca.get();
+            List<Episodios> topEpisodios = repository.topEpisodiosPorSerie(serie, PageRequest.of(0,5));
+            Set<Long> idsImpressos = new HashSet<>();
+            topEpisodios.forEach(e -> {
+                if (idsImpressos.add(e.getId())) {
+                    System.out.printf("Série: %s | Temporada: %s | Episodio %s - %s | Avaliação: %.2f\n",
+                            e.getSerie().getTitulo(), e.getTemporada(), e.getNumeroEpisodio(), e.getTitulo(), e.getAvaliacao());
+                }
+            });
+        } else {
+            System.out.println("Série não encontrada");
+        }
+    }
+
+    private void buscarEpisodioPorData(){
+        buscarSerieTitulo();
+        if (serieBusca.isPresent()){
+            Serie serie = serieBusca.get();
+            System.out.println("Digite o ano limite de lançamento:");
+            int anoLancamento = Integer.parseInt(scanner.nextLine().trim());
+            List<Episodios> episodiosAno = repository.episodiosPorSerieEAno(serie,anoLancamento);
+            episodiosAno.forEach(System.out::println);
         }
     }
 

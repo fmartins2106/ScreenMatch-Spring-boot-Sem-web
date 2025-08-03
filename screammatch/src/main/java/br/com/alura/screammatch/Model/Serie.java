@@ -23,7 +23,7 @@ public class Serie {
     private String poster;
     private String sinopse;
 
-    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Episodios> episodios = new ArrayList<>();
 
     public Serie() {
@@ -31,7 +31,10 @@ public class Serie {
 
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
-        this.totalTemporadas = Integer.valueOf(dadosSerie.totalTemporadas());
+        String totalTemporadasStr = dadosSerie.totalTemporadas();
+        this.totalTemporadas = (totalTemporadasStr != null && !totalTemporadasStr.isBlank())
+                ? Integer.valueOf(totalTemporadasStr)
+                : 0; // ou lance uma exceção, se preferir
         String avaliacaoStr = dadosSerie.avaliacao();
         this.avaliacao = Optional.ofNullable(avaliacaoStr)
                 .filter(s -> !s.isBlank())
